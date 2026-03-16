@@ -1,0 +1,145 @@
+.equipment-card {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.equipment-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.equipment-image {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.equipment-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.equipment-card:hover .equipment-image img {
+  transform: scale(1.1);
+}
+
+.badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 0.3rem 0.8rem;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badge.unavailable {
+  background: #dc3545;
+  color: white;
+}
+
+.equipment-details {
+  padding: 1.5rem;
+}
+
+.equipment-details h3 {
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.rating {
+  margin-bottom: 1rem;
+}
+
+.star {
+  color: #ddd;
+  font-size: 1.2rem;
+}
+
+.star.filled {
+  color: #ffc107;
+}
+
+.review-count {
+  color: #666;
+  font-size: 0.9rem;
+  margin-left: 0.5rem;
+}
+
+.pricing {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.hourly-rate {
+  color: #ffc107;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.daily-rate {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.vendor-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .equipment-image {
+    height: 150px;
+  }
+
+  .equipment-details {
+    padding: 1rem;
+  }
+
+  .equipment-details h3 {
+    font-size: 1rem;
+  }
+
+  .pricing {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .vendor-info {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+.book-btn {
+  width: 100%;
+  padding: 0.8rem;
+  background: #ffc107;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.book-btn:hover:not(.disabled) {
+  background: #e0a800;
+}
+
+.book-btn.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}

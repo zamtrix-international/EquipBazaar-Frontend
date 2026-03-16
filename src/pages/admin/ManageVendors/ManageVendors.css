@@ -1,0 +1,285 @@
+.manage-vendors-page {
+  padding: 3rem 0;
+  min-height: calc(100vh - 160px);
+  background: #f8f9fa;
+}
+
+.page-title {
+  color: #1a1a1a;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+}
+
+.filters-bar {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 300px;
+  position: relative;
+}
+
+.search-box i {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 0.8rem 1rem 0.8rem 2.5rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #ffc107;
+}
+
+.status-filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.filter-btn:hover {
+  border-color: #ffc107;
+}
+
+.filter-btn.active {
+  background: #ffc107;
+  color: white;
+  border-color: #ffc107;
+}
+
+.vendors-table-container {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+.vendors-table {
+  width: 100%;
+  border-collapse: collapse;
+  /* allow table to shrink on narrow screens */
+  min-width: 0;
+}
+
+@media (max-width: 480px) {
+  .vendors-table {
+    font-size: 0.8rem;
+  }
+  .vendors-table th,
+  .vendors-table td {
+    padding: 0.6rem;
+  }
+}
+.vendors-table th {
+  background: #f8f9fa;
+  padding: 1rem;
+  text-align: left;
+  color: #555;
+  font-weight: 600;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.vendors-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.vendor-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.vendor-avatar {
+  width: 45px;
+  height: 45px;
+  background: #ffc107;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.vendor-name {
+  color: #1a1a1a;
+  font-weight: 500;
+  margin-bottom: 0.2rem;
+}
+
+.vendor-email,
+.vendor-phone {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.business-info .business-name {
+  color: #1a1a1a;
+  font-weight: 500;
+  margin-bottom: 0.2rem;
+}
+
+.equipment-count {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.equipment-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.equipment-tag {
+  background: #f0f0f0;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.kyc-badge {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.kyc-badge.verified {
+  background: #d4edda;
+  color: #155724;
+}
+
+.kyc-badge.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-badge.approved {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.suspended {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.stars {
+  color: #ffc107;
+  letter-spacing: 2px;
+}
+
+.rating-value {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.no-rating {
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-approve,
+.btn-reject,
+.btn-suspend,
+.btn-activate,
+.btn-view {
+  padding: 0.3rem 0.8rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: opacity 0.3s;
+}
+
+.btn-approve {
+  background: #28a745;
+  color: white;
+}
+
+.btn-reject {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-suspend {
+  background: #ffc107;
+  color: white;
+}
+
+.btn-activate {
+  background: #17a2b8;
+  color: white;
+}
+
+.btn-view {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-approve:hover,
+.btn-reject:hover,
+.btn-suspend:hover,
+.btn-activate:hover,
+.btn-view:hover {
+  opacity: 0.8;
+}

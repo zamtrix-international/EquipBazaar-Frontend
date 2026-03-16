@@ -1,0 +1,144 @@
+.vendor-dashboard {
+  padding: 3rem 0;
+  min-height: calc(100vh - 160px);
+  background: #f8f9fa;
+}
+
+.dashboard-title {
+  color: #1a1a1a;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+  color: #1a1a1a;
+}
+
+.view-all {
+  color: #ffc107;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.view-all:hover {
+  text-decoration: underline;
+}
+
+.bookings-table {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.bookings-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bookings-table th {
+  background: #f8f9fa;
+  padding: 1rem;
+  text-align: left;
+  color: #555;
+  font-weight: 600;
+}
+
+.bookings-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-badge.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.confirmed {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.status-badge.completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-accept,
+.btn-reject {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: opacity 0.3s;
+}
+
+.btn-accept {
+  background: #28a745;
+  color: white;
+}
+
+.btn-reject {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-accept:hover,
+.btn-reject:hover {
+  opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+  .stats-grid,
+  .actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .bookings-table {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid,
+  .actions-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,120 @@
+/* pages/Module/Login/Login.css */
+
+.login-container {
+  min-height: calc(100vh - 160px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  width: 100%; /* हे add केले */
+}
+
+.login-box {
+  background: white;
+  padding: 3rem;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto; /* हे add केले */
+}
+
+@media (max-width: 480px) {
+  .login-box {
+    max-width: 90%;
+    padding: 2rem;
+  }
+}
+
+.login-box h2 {
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  text-align: center; /* हे add केले - शीर्षक मध्यभागी */
+}
+
+.login-box p {
+  color: #666;
+  margin-bottom: 2rem;
+  text-align: center; /* हे add केले - सबटायटल मध्यभागी */
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+  width: 100%; /* हे add केले */
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 500;
+  text-align: left; /* हे अगदी महत्त्वाचे - label डावीकडे */
+  width: 100%; /* हे add केले */
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+  display: block; /* हे add केले */
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #ffc107;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #ffc107;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin-top: 1rem;
+  display: block; /* हे add केले */
+}
+
+.login-btn:hover {
+  background: #e0a800;
+}
+
+.signup-link {
+  text-align: center;
+  margin-top: 2rem;
+  color: #666;
+  width: 100%; /* हे add केले */
+}
+
+.signup-link a {
+  color: #ffc107;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
+}
+
+/* Error message styling (optional) */
+.error-message {
+  background: #fee;
+  color: #c33;
+  padding: 0.8rem;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+  text-align: center;
+  border: 1px solid #fcc;
+  width: 100%;
+}
