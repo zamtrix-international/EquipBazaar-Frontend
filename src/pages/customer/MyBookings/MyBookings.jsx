@@ -1,444 +1,448 @@
-// import { useState, useEffect } from 'react'
-// import { bookingAPI } from '../../../services/api'
-// import './MyBookings.css'
+// pages/customer/MyBookings/MyBookings.jsx
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { bookingAPI } from '../../../services/api';
+import './MyBookings.css';
 
-// const MyBookings = () => {
-//   const [bookings, setBookings] = useState([])
-//   const [loading, setLoading] = useState(true)
-//   const [error, setError] = useState(null)
-//   const [filter, setFilter] = useState('all')
-
-//   useEffect(() => {
-//     const fetchMyBookings = async () => {
-//       try {
-//         setLoading(true)
-//         setError(null)
-//         const response = await bookingAPI.getMyBookings({ 
-//           status: filter === 'all' ? undefined : filter 
-//         })
-//         setBookings(response.data.bookings || [])
-//       } catch (error) {
-//         console.error('Error fetching my bookings:', error)
-//         setError('Failed to load bookings. Please try again.')
-//         // Fallback to mock data if API fails
-//         setBookings([
-//           {
-//             id: 1,
-//             equipment: 'JCB 3DX',
-//             image: 'https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-//             date: '2024-03-15',
-//             duration: '4 hours',
-//             amount: 4800,
-//             status: 'completed',
-//             vendor: 'Ramesh Construction'
-//           },
-//           {
-//             id: 2,
-//             equipment: 'Mahindra Tractor',
-//             image: 'https://images.unsplash.com/photo-1597161016902-80a5b1b10b1a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-//             date: '2024-03-18',
-//             duration: '8 hours',
-//             amount: 6400,
-//             status: 'confirmed',
-//             vendor: 'Singh Agro Services'
-//           },
-//           {
-//             id: 3,
-//             equipment: 'Hydra Crane',
-//             image: 'https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-//             date: '2024-03-20',
-//             duration: '2 hours',
-//             amount: 5000,
-//             status: 'pending',
-//             vendor: 'Meerut Crane Services'
-//           },
-//           {
-//             id: 4,
-//             equipment: 'Ashok Leyland Dumper',
-//             image: 'https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-//             date: '2024-03-22',
-//             duration: '1 day',
-//             amount: 10000,
-//             status: 'in_progress',
-//             vendor: 'Verma Transport'
-//           }
-//         ])
-//       } finally {
-//         setLoading(false)
-//       }
-//     }
-
-//     fetchMyBookings()
-//   }, [filter]) // Added filter dependency
-
-//   const filteredBookings = filter === 'all' 
-//     ? bookings 
-//     : bookings.filter(b => b.status === filter)
-
-//   const getStatusClass = (status) => {
-//     switch(status) {
-//       case 'completed': return 'status-completed'
-//       case 'confirmed': return 'status-confirmed'
-//       case 'pending': return 'status-pending'
-//       case 'in_progress': return 'status-progress'
-//       default: return ''
-//     }
-//   }
-
-//   const handleCancelBooking = async (bookingId) => {
-//     if (window.confirm('Are you sure you want to cancel this booking?')) {
-//       try {
-//         // Call API to cancel booking
-//         // await bookingAPI.cancelBooking(bookingId)
-        
-//         // Update local state
-//         setBookings(prevBookings => 
-//           prevBookings.map(booking => 
-//             booking.id === bookingId 
-//               ? { ...booking, status: 'cancelled' } 
-//               : booking
-//           )
-//         )
-//       } catch (error) {
-//         console.error('Error cancelling booking:', error)
-//         alert('Failed to cancel booking. Please try again.')
-//       }
-//     }
-//   }
-
-//   const handleTrackBooking = (bookingId) => {
-//     // Navigate to tracking page
-//     console.log('Track booking:', bookingId)
-//   }
-
-//   const handleWriteReview = (bookingId) => {
-//     // Navigate to review page
-//     console.log('Write review for booking:', bookingId)
-//   }
-
-//   const handleViewDetails = (bookingId) => {
-//     // Navigate to booking details page
-//     console.log('View details for booking:', bookingId)
-//   }
-
-//   const formatDate = (dateString) => {
-//     return new Date(dateString).toLocaleDateString('en-IN', {
-//       day: 'numeric',
-//       month: 'short',
-//       year: 'numeric'
-//     })
-//   }
-
-//   const formatStatus = (status) => {
-//     return status.split('_').map(word => 
-//       word.charAt(0).toUpperCase() + word.slice(1)
-//     ).join(' ')
-//   }
-
-//   if (loading) {
-//     return (
-//       <div className="my-bookings-page">
-//         <div className="container">
-//           <div className="loading-spinner">
-//             <i className="fas fa-spinner fa-spin"></i>
-//             <p>Loading your bookings...</p>
-//           </div>
-//         </div>
-//       </div>
-//     )
-//   }
-
-//   return (
-//     <div className="my-bookings-page">
-//       <div className="container">
-//         <h1 className="page-title">My Bookings</h1>
-
-//         {error && (
-//           <div className="error-message">
-//             <i className="fas fa-exclamation-circle"></i>
-//             <p>{error}</p>
-//             <button onClick={() => window.location.reload()}>Retry</button>
-//           </div>
-//         )}
-
-//         {/* Filter Tabs */}
-//         <div className="filter-tabs">
-//           {['all', 'pending', 'confirmed', 'in_progress', 'completed'].map((tab) => (
-//             <button
-//               key={tab}
-//               className={`filter-tab ${filter === tab ? 'active' : ''}`}
-//               onClick={() => setFilter(tab)}
-//             >
-//               {formatStatus(tab)}
-//             </button>
-//           ))}
-//         </div>
-
-//         {/* Bookings List */}
-//         <div className="bookings-container">
-//           {filteredBookings.length > 0 ? (
-//             filteredBookings.map(booking => (
-//               <div key={booking.id} className="booking-card">
-//                 <div className="booking-image">
-//                   <img src={booking.image} alt={booking.equipment} />
-//                 </div>
-                
-//                 <div className="booking-details">
-//                   <div className="booking-header">
-//                     <h3>{booking.equipment}</h3>
-//                     <span className={`booking-status ${getStatusClass(booking.status)}`}>
-//                       {formatStatus(booking.status)}
-//                     </span>
-//                   </div>
-
-//                   <div className="booking-info">
-//                     <p><i className="fas fa-calendar"></i> {formatDate(booking.date)}</p>
-//                     <p><i className="fas fa-clock"></i> {booking.duration}</p>
-//                     <p><i className="fas fa-user"></i> {booking.vendor}</p>
-//                   </div>
-
-//                   <div className="booking-footer">
-//                     <div className="booking-amount">
-//                       <span>Total Amount:</span>
-//                       <strong>₹{booking.amount.toLocaleString('en-IN')}</strong>
-//                     </div>
-                    
-//                     <div className="booking-actions">
-//                       {booking.status === 'pending' && (
-//                         <>
-//                           <button 
-//                             className="btn-cancel"
-//                             onClick={() => handleCancelBooking(booking.id)}
-//                           >
-//                             <i className="fas fa-times"></i> Cancel
-//                           </button>
-//                           <button 
-//                             className="btn-view"
-//                             onClick={() => handleViewDetails(booking.id)}
-//                           >
-//                             View Details
-//                           </button>
-//                         </>
-//                       )}
-                      
-//                       {booking.status === 'confirmed' && (
-//                         <>
-//                           <button 
-//                             className="btn-track"
-//                             onClick={() => handleTrackBooking(booking.id)}
-//                           >
-//                             <i className="fas fa-map-marker-alt"></i> Track
-//                           </button>
-//                           <button 
-//                             className="btn-view"
-//                             onClick={() => handleViewDetails(booking.id)}
-//                           >
-//                             View Details
-//                           </button>
-//                         </>
-//                       )}
-                      
-//                       {booking.status === 'in_progress' && (
-//                         <>
-//                           <button 
-//                             className="btn-track"
-//                             onClick={() => handleTrackBooking(booking.id)}
-//                           >
-//                             <i className="fas fa-map-marker-alt"></i> Track
-//                           </button>
-//                           <button 
-//                             className="btn-view"
-//                             onClick={() => handleViewDetails(booking.id)}
-//                           >
-//                             View Details
-//                           </button>
-//                         </>
-//                       )}
-                      
-//                       {booking.status === 'completed' && (
-//                         <>
-//                           <button 
-//                             className="btn-review"
-//                             onClick={() => handleWriteReview(booking.id)}
-//                           >
-//                             <i className="fas fa-star"></i> Write Review
-//                           </button>
-//                           <button 
-//                             className="btn-view"
-//                             onClick={() => handleViewDetails(booking.id)}
-//                           >
-//                             View Details
-//                           </button>
-//                         </>
-//                       )}
-//                     </div>
-//                   </div>
-//                 </div>
-//               </div>
-//             ))
-//           ) : (
-//             <div className="no-bookings">
-//               <i className="fas fa-calendar-times"></i>
-//               <h3>No bookings found</h3>
-//               <p>
-//                 {filter !== 'all' 
-//                   ? `You don't have any ${formatStatus(filter)} bookings yet` 
-//                   : "You haven't made any bookings yet"}
-//               </p>
-//               <button className="btn-browse">
-//                 <i className="fas fa-search"></i> Browse Equipment
-//               </button>
-//             </div>
-//           )}
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
-// export default MyBookings
-
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { bookingAPI } from '../../../services/api'
-import './MyBookings.css'
+// Icon Components (Construction Theme)
+const Icons = {
+  Spinner: () => (
+    <svg className="spinner" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10"></circle>
+      <path d="M12 2v4M12 22v-4M4 12H2M22 12h-2M19.07 4.93l-2.83 2.83M6.9 17.1l-2.82 2.82M17.1 6.9l2.82-2.82M4.93 19.07l2.83-2.83"></path>
+    </svg>
+  ),
+  
+  Calendar: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+      <line x1="16" y1="2" x2="16" y2="6"></line>
+      <line x1="8" y1="2" x2="8" y2="6"></line>
+      <line x1="3" y1="10" x2="21" y2="10"></line>
+    </svg>
+  ),
+  
+  Clock: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10"></circle>
+      <polyline points="12 6 12 12 16 14"></polyline>
+    </svg>
+  ),
+  
+  User: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+      <circle cx="12" cy="7" r="4"></circle>
+    </svg>
+  ),
+  
+  Times: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  ),
+  
+  Eye: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+      <circle cx="12" cy="12" r="3"></circle>
+    </svg>
+  ),
+  
+  Star: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+    </svg>
+  ),
+  
+  Search: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="11" cy="11" r="8"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+  ),
+  
+  CalendarTimes: () => (
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+      <line x1="8" y1="2" x2="8" y2="6"></line>
+      <line x1="16" y1="2" x2="16" y2="6"></line>
+      <line x1="3" y1="10" x2="21" y2="10"></line>
+      <line x1="15" y1="14" x2="9" y2="20"></line>
+      <line x1="9" y1="14" x2="15" y2="20"></line>
+    </svg>
+  ),
+  
+  Exclamation: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+  )
+};
 
 const MyBookings = () => {
-  const [bookings, setBookings] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [filter, setFilter] = useState('all')
-  const navigate = useNavigate()
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [filter, setFilter] = useState('all');
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    pages: 0
+  });
+  
+  const navigate = useNavigate();
 
+  // Fetch bookings
+  const fetchBookings = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const params = {
+        page: pagination.page,
+        limit: pagination.limit,
+        ...(filter !== 'all' && { status: filter })
+      };
+
+      const response = await bookingAPI.getMyBookings(params);
+      
+      if (response?.data?.success) {
+        setBookings(response.data.data.bookings || []);
+        setPagination(prev => ({
+          ...prev,
+          total: response.data.data.total || 0,
+          pages: response.data.data.pages || 0
+        }));
+      } else {
+        throw new Error(response?.data?.message || 'Failed to fetch bookings');
+      }
+    } catch (err) {
+      console.error('Error fetching bookings:', err);
+      setError(err.message || 'Failed to load bookings. Please try again.');
+      setBookings([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [filter, pagination.page, pagination.limit]);
+
+  // Initial fetch
   useEffect(() => {
-    const fetchMyBookings = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        const response = await bookingAPI.getMyBookings({ status: filter === 'all' ? undefined : filter })
-        setBookings(response.data.bookings || [])
-      } catch (error) {
-        console.error('Error fetching my bookings:', error)
-        setError('Failed to load bookings. Please try again.')
-        setBookings([
-          { id: 1, equipment: 'JCB 3DX', image: 'https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', date: '2024-03-15', duration: '4 hours', amount: 4800, status: 'completed', vendor: 'Ramesh Construction' },
-          { id: 2, equipment: 'Mahindra Tractor', image: 'https://images.unsplash.com/photo-1597161016902-80a5b1b10b1a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', date: '2024-03-18', duration: '8 hours', amount: 6400, status: 'confirmed', vendor: 'Singh Agro Services' },
-          { id: 3, equipment: 'Hydra Crane', image: 'https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', date: '2024-03-20', duration: '2 hours', amount: 5000, status: 'pending', vendor: 'Meerut Crane Services' },
-          { id: 4, equipment: 'Ashok Leyland Dumper', image: 'https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', date: '2024-03-22', duration: '1 day', amount: 10000, status: 'in_progress', vendor: 'Verma Transport' }
-        ])
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchMyBookings()
-  }, [filter])
+    fetchBookings();
+  }, [fetchBookings]);
 
-  const getStatusClass = (status) => {
-    switch (status) {
-      case 'completed': return 'status-completed'
-      case 'confirmed': return 'status-confirmed'
-      case 'pending': return 'status-pending'
-      case 'in_progress': return 'status-progress'
-      default: return ''
-    }
-  }
+  // Handle filter change
+  const handleFilterChange = (newFilter) => {
+    setFilter(newFilter);
+    setPagination(prev => ({ ...prev, page: 1 }));
+  };
 
+  // Handle cancel booking
   const handleCancelBooking = async (bookingId) => {
-    if (window.confirm('Are you sure you want to cancel this booking?')) {
-      try {
-        await bookingAPI.cancel(bookingId)
-        setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: 'cancelled' } : b))
-      } catch (error) {
-        console.error('Error cancelling booking:', error)
-        alert('Failed to cancel booking. Please try again.')
+    if (!window.confirm('Are you sure you want to cancel this booking?')) return;
+
+    try {
+      const response = await bookingAPI.cancelBooking(bookingId);
+      
+      if (response?.data?.success) {
+        // Refresh bookings after cancellation
+        fetchBookings();
+      } else {
+        throw new Error(response?.data?.message || 'Failed to cancel booking');
       }
+    } catch (err) {
+      console.error('Error cancelling booking:', err);
+      alert(err.message || 'Failed to cancel booking. Please try again.');
     }
+  };
+
+  // Handle view details
+  const handleViewDetails = (bookingId) => {
+    navigate(`/customer/bookings/${bookingId}`);
+  };
+
+  // Handle write review
+  const handleWriteReview = (bookingId) => {
+    navigate(`/customer/review/${bookingId}`);
+  };
+
+  // Handle browse equipment
+  const handleBrowseEquipment = () => {
+    navigate('/equipment');
+  };
+
+  // Handle retry
+  const handleRetry = () => {
+    fetchBookings();
+  };
+
+  // Format date
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const options = { day: 'numeric', month: 'short', year: 'numeric' };
+    return new Date(dateString).toLocaleDateString('en-IN', options);
+  };
+
+  // Format status
+  const formatStatus = (status) => {
+    if (!status) return 'Unknown';
+    return status.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
+
+  // Get status class
+  const getStatusClass = (status) => {
+    const statusMap = {
+      'pending': 'status-pending',
+      'confirmed': 'status-confirmed',
+      'in_progress': 'status-progress',
+      'completed': 'status-completed',
+      'cancelled': 'status-cancelled'
+    };
+    return statusMap[status] || '';
+  };
+
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  // Loading state
+  if (loading && bookings.length === 0) {
+    return (
+      <div className="my-bookings-page">
+        <div className="container">
+          <div className="loading-state">
+            <Icons.Spinner />
+            <p>Loading your bookings...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
-
-  const handleViewDetails = (bookingId) => navigate(`/customer/bookings/${bookingId}`)
-  const handleWriteReview = (bookingId) => navigate(`/customer/review/${bookingId}`)
-
-  const formatDate = (dateString) => new Date(dateString).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-  const formatStatus = (status) => status.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
-
-  if (loading) return (
-    <div className="my-bookings-page"><div className="container"><div className="loading-spinner"><i className="fas fa-spinner fa-spin"></i><p>Loading your bookings...</p></div></div></div>
-  )
 
   return (
     <div className="my-bookings-page">
       <div className="container">
-        <h1 className="page-title">My Bookings</h1>
+        {/* Header */}
+        <div className="page-header">
+          <h1 className="page-title">My Bookings</h1>
+          {bookings.length > 0 && (
+            <p className="bookings-count">
+              Showing {bookings.length} of {pagination.total} bookings
+            </p>
+          )}
+        </div>
 
+        {/* Error Message */}
         {error && (
-          <div className="error-message">
-            <i className="fas fa-exclamation-circle"></i>
+          <div className="error-state">
+            <Icons.Exclamation />
             <p>{error}</p>
-            <button onClick={() => window.location.reload()}>Retry</button>
+            <button onClick={handleRetry} className="btn-retry">
+              Try Again
+            </button>
           </div>
         )}
 
+        {/* Filter Tabs */}
         <div className="filter-tabs">
-          {['all', 'pending', 'confirmed', 'in_progress', 'completed'].map((tab) => (
-            <button key={tab} className={`filter-tab ${filter === tab ? 'active' : ''}`} onClick={() => setFilter(tab)}>
+          {['all', 'pending', 'confirmed', 'in_progress', 'completed', 'cancelled'].map((tab) => (
+            <button
+              key={tab}
+              className={`filter-tab ${filter === tab ? 'active' : ''} ${getStatusClass(tab)}`}
+              onClick={() => handleFilterChange(tab)}
+            >
               {formatStatus(tab)}
             </button>
           ))}
         </div>
 
+        {/* Bookings List */}
         <div className="bookings-container">
           {bookings.length > 0 ? (
-            bookings.map(booking => (
-              <div key={booking.id} className="booking-card">
-                <div className="booking-image"><img src={booking.image} alt={booking.equipment} /></div>
-                <div className="booking-details">
-                  <div className="booking-header">
-                    <h3>{booking.equipment}</h3>
-                    <span className={`booking-status ${getStatusClass(booking.status)}`}>{formatStatus(booking.status)}</span>
+            <>
+              {bookings.map(booking => (
+                <div key={booking.id} className="booking-card">
+                  {/* Image */}
+                  <div className="booking-image">
+                    <img 
+                      src={booking.image || '/placeholder-equipment.jpg'} 
+                      alt={booking.equipment?.name || 'Equipment'}
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.src = '/placeholder-equipment.jpg';
+                      }}
+                    />
                   </div>
-                  <div className="booking-info">
-                    <p><i className="fas fa-calendar"></i> {formatDate(booking.date)}</p>
-                    <p><i className="fas fa-clock"></i> {booking.duration}</p>
-                    <p><i className="fas fa-user"></i> {booking.vendor}</p>
-                  </div>
-                  <div className="booking-footer">
-                    <div className="booking-amount">
-                      <span>Total Amount:</span>
-                      <strong>₹{booking.amount.toLocaleString('en-IN')}</strong>
+                  
+                  {/* Details */}
+                  <div className="booking-details">
+                    <div className="booking-header">
+                      <div>
+                        <h3>{booking.equipment?.name || 'Equipment'}</h3>
+                        <p className="booking-vendor">{booking.vendor?.name || booking.vendor}</p>
+                      </div>
+                      <span className={`booking-status ${getStatusClass(booking.status)}`}>
+                        {formatStatus(booking.status)}
+                      </span>
                     </div>
-                    <div className="booking-actions">
-                      {booking.status === 'pending' && (
-                        <>
-                          <button className="btn-cancel" onClick={() => handleCancelBooking(booking.id)}><i className="fas fa-times"></i> Cancel</button>
-                          <button className="btn-view" onClick={() => handleViewDetails(booking.id)}>View Details</button>
-                        </>
-                      )}
-                      {(booking.status === 'confirmed' || booking.status === 'in_progress') && (
-                        <button className="btn-view" onClick={() => handleViewDetails(booking.id)}>View Details</button>
-                      )}
-                      {booking.status === 'completed' && (
-                        <>
-                          <button className="btn-review" onClick={() => handleWriteReview(booking.id)}><i className="fas fa-star"></i> Write Review</button>
-                          <button className="btn-view" onClick={() => handleViewDetails(booking.id)}>View Details</button>
-                        </>
-                      )}
+
+                    <div className="booking-info">
+                      <p>
+                        <Icons.Calendar />
+                        {formatDate(booking.startDate || booking.date)}
+                      </p>
+                      <p>
+                        <Icons.Clock />
+                        {booking.duration || `${booking.hours || 1} hours`}
+                      </p>
+                      <p>
+                        <Icons.User />
+                        {booking.vendor?.name || booking.vendor || 'Vendor'}
+                      </p>
+                    </div>
+
+                    <div className="booking-footer">
+                      <div className="booking-amount">
+                        <span>Total Amount:</span>
+                        <strong>{formatCurrency(booking.totalAmount || booking.amount)}</strong>
+                      </div>
+                      
+                      <div className="booking-actions">
+                        {/* Pending Bookings */}
+                        {booking.status === 'pending' && (
+                          <>
+                            <button 
+                              className="btn-cancel"
+                              onClick={() => handleCancelBooking(booking.id)}
+                              title="Cancel Booking"
+                            >
+                              <Icons.Times />
+                              <span>Cancel</span>
+                            </button>
+                            <button 
+                              className="btn-view"
+                              onClick={() => handleViewDetails(booking.id)}
+                              title="View Details"
+                            >
+                              <Icons.Eye />
+                              <span>Details</span>
+                            </button>
+                          </>
+                        )}
+                        
+                        {/* Confirmed/In Progress Bookings */}
+                        {(booking.status === 'confirmed' || booking.status === 'in_progress') && (
+                          <button 
+                            className="btn-view"
+                            onClick={() => handleViewDetails(booking.id)}
+                            title="View Details"
+                          >
+                            <Icons.Eye />
+                            <span>View Details</span>
+                          </button>
+                        )}
+                        
+                        {/* Completed Bookings */}
+                        {booking.status === 'completed' && (
+                          <>
+                            <button 
+                              className="btn-review"
+                              onClick={() => handleWriteReview(booking.id)}
+                              title="Write Review"
+                            >
+                              <Icons.Star />
+                              <span>Write Review</span>
+                            </button>
+                            <button 
+                              className="btn-view"
+                              onClick={() => handleViewDetails(booking.id)}
+                              title="View Details"
+                            >
+                              <Icons.Eye />
+                              <span>Details</span>
+                            </button>
+                          </>
+                        )}
+                        
+                        {/* Cancelled Bookings */}
+                        {booking.status === 'cancelled' && (
+                          <button 
+                            className="btn-view"
+                            onClick={() => handleViewDetails(booking.id)}
+                            title="View Details"
+                          >
+                            <Icons.Eye />
+                            <span>View Details</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))
+              ))}
+
+              {/* Pagination */}
+              {pagination.pages > 1 && (
+                <div className="pagination">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                    disabled={pagination.page === 1}
+                  >
+                    ← Previous
+                  </button>
+                  
+                  <span className="pagination-info">
+                    Page {pagination.page} of {pagination.pages}
+                  </span>
+                  
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                    disabled={pagination.page === pagination.pages}
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
-            <div className="no-bookings">
-              <i className="fas fa-calendar-times"></i>
+            // Empty State
+            <div className="empty-state">
+              <div className="empty-icon">
+                <Icons.CalendarTimes />
+              </div>
               <h3>No bookings found</h3>
-              <p>{filter !== 'all' ? `You don't have any ${formatStatus(filter)} bookings yet` : "You haven't made any bookings yet"}</p>
-              <button className="btn-browse" onClick={() => navigate('/equipment')}><i className="fas fa-search"></i> Browse Equipment</button>
+              <p>
+                {filter !== 'all' 
+                  ? `You don't have any ${formatStatus(filter)} bookings yet` 
+                  : "You haven't made any bookings yet"}
+              </p>
+              <button 
+                className="btn-browse"
+                onClick={handleBrowseEquipment}
+              >
+                <Icons.Search />
+                <span>Browse Equipment</span>
+              </button>
             </div>
           )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default MyBookings
+export default MyBookings;

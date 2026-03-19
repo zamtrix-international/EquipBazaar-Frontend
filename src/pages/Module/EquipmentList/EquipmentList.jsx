@@ -1,282 +1,357 @@
-import { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
-import EquipmentCard from '../../../components/EquipmentCard/EquipmentCard'
-import { equipmentAPI } from '../../../services/api'
-import './EquipmentList.css'
+// pages/Module/EquipmentList/EquipmentList.jsx
+import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import EquipmentCard from '../../../components/EquipmentCard/EquipmentCard';
+import { equipmentAPI } from '../../../services/api';
+import './EquipmentList.css';
 
 const EquipmentList = () => {
-  const location = useLocation()
-  const [equipment, setEquipment] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // State management
+  const [equipment, setEquipment] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [filters, setFilters] = useState({
-    category: '',
-    minPrice: '',
-    maxPrice: '',
-    location: 'Meerut'
-  })
-  const [showFilters, setShowFilters] = useState(false)
+    category: searchParams.get('category') || '',
+    minPrice: searchParams.get('minPrice') || '',
+    maxPrice: searchParams.get('maxPrice') || '',
+    location: searchParams.get('location') || 'Meerut'
+  });
+  const [showFilters, setShowFilters] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: parseInt(searchParams.get('page')) || 1,
+    limit: 12,
+    total: 0,
+    pages: 0
+  });
 
-  useEffect(() => {
-    const fetchEquipment = async () => {
-      setLoading(true)
-      setError('')
-      try {
-        // API call try karo
-        const response = await equipmentAPI.getAll({ page: 1, limit: 100 })
-        if (response.data && response.data.data) {
-          setEquipment(response.data.data.rows || [])
-        }
-      } catch (err) {
-        setError('Failed to fetch equipment. Please try again.')
-        console.error('Equipment fetch error:', err)
-        // Fixed: Properly structured mock data with commas
-        setEquipment([
-          {
-            id: 1,
-            name: 'JCB 3DX',
-            category: 'JCB',
-            hourlyRate: 1200,
-            dailyRate: 8000,
-            rating: 4.5,
-            reviews: 128,
-            image: 'https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            vendor: 'Ramesh Construction',
-            location: 'Meerut City',
-            available: true
-          },
-          {
-            id: 2,
-            name: 'Mahindra Tractor',
-            category: 'Tractor',
-            hourlyRate: 800,
-            dailyRate: 5000,
-            rating: 4.3,
-            reviews: 95,
-            image: 'https://images.unsplash.com/photo-1597161016902-80a5b1b10b1a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            vendor: 'Singh Agro Services',
-            location: 'Modipuram',
-            available: true
-          },
-          {
-            id: 3,
-            name: 'Hydra Crane',
-            category: 'Crane',
-            hourlyRate: 2500,
-            dailyRate: 18000,
-            rating: 4.7,
-            reviews: 67,
-            image: 'https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            vendor: 'Meerut Crane Services',
-            location: 'Lisari Road',
-            available: true
-          },
-          {
-            id: 4,
-            name: 'Ashok Leyland Dumper',
-            category: 'Dumper',
-            hourlyRate: 1800,
-            dailyRate: 12000,
-            rating: 4.2,
-            reviews: 43,
-            image: 'https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            vendor: 'Verma Transport',
-            location: 'Delhi Road',
-            available: true
-          },
-          {
-            id: 5,
-            name: 'Sonalika Tractor',
-            category: 'Tractor',
-            hourlyRate: 750,
-            dailyRate: 4800,
-            rating: 4.4,
-            reviews: 82,
-            image: 'https://images.unsplash.com/photo-1597161016902-80a5b1b10b1a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            vendor: 'Kisan Agro',
-            location: 'Sardhana',
-            available: true
-          },
-          {
-            id: 6,
-            name: 'Swaraj Tractor',
-            category: 'Tractor',
-            hourlyRate: 700,
-            dailyRate: 4500,
-            rating: 4.3,
-            reviews: 41,
-            image: 'https://images.unsplash.com/photo-1597161016902-80a5b1b10b1a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            vendor: 'Kisan Agro',
-            location: 'Sardhana',
-            available: true
-          }
-        ])
-      } finally {
-        setLoading(false)
+  // Fetch equipment from API
+  const fetchEquipment = useCallback(async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      // Prepare query parameters
+      const queryParams = {
+        page: pagination.page,
+        limit: pagination.limit,
+        ...(filters.category && { category: filters.category }),
+        ...(filters.minPrice && { minPrice: filters.minPrice }),
+        ...(filters.maxPrice && { maxPrice: filters.maxPrice }),
+        ...(filters.location && { location: filters.location })
+      };
+
+      // API call
+      const response = await equipmentAPI.getAll(queryParams);
+      
+      if (response?.data?.success) {
+        const { data, pagination: paginationData } = response.data;
+        setEquipment(data || []);
+        setPagination(prev => ({
+          ...prev,
+          total: paginationData?.total || 0,
+          pages: paginationData?.pages || 0
+        }));
+      } else {
+        throw new Error(response?.data?.message || 'Failed to fetch equipment');
       }
+    } catch (err) {
+      console.error('Equipment fetch error:', err);
+      setError(err.message || 'Failed to fetch equipment. Please try again.');
+      setEquipment([]);
+    } finally {
+      setLoading(false);
     }
+  }, [pagination.page, pagination.limit, filters]);
 
-    fetchEquipment()
-  }, []) // Only one useEffect
+  // Initial fetch and when dependencies change
+  useEffect(() => {
+    fetchEquipment();
+  }, [fetchEquipment]);
 
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target
+  // Update URL params when filters or page change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) params.set(key, value);
+    });
+    
+    if (pagination.page > 1) params.set('page', pagination.page);
+    
+    setSearchParams(params);
+  }, [filters, pagination.page, setSearchParams]);
+
+  // Handle filter changes
+  const handleFilterChange = useCallback((e) => {
+    const { name, value } = e.target;
     setFilters(prev => ({
       ...prev,
       [name]: value
-    }))
-  }
+    }));
+    // Reset to page 1 when filters change
+    setPagination(prev => ({ ...prev, page: 1 }));
+  }, []);
 
-  const clearFilters = () => {
+  // Clear all filters
+  const clearFilters = useCallback(() => {
     setFilters({
       category: '',
       minPrice: '',
       maxPrice: '',
-      location: ''
-    })
-  }
+      location: 'Meerut'
+    });
+    setPagination(prev => ({ ...prev, page: 1 }));
+  }, []);
 
-  const filteredEquipment = equipment.filter(item => {
-    // Category filter
-    if (filters.category && item.category !== filters.category) return false
-    
-    // Price range filter (using hourly rate)
-    if (filters.minPrice && item.hourlyRate < parseInt(filters.minPrice)) return false
-    if (filters.maxPrice && item.hourlyRate > parseInt(filters.maxPrice)) return false
-    
-    // Location filter (case-insensitive partial match)
-    if (filters.location && !item.location.toLowerCase().includes(filters.location.toLowerCase())) return false
-    
-    return true
-  })
+  // Toggle mobile filters
+  const toggleFilters = useCallback(() => {
+    setShowFilters(prev => !prev);
+    // Prevent body scroll when filters are open on mobile
+    if (!showFilters) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+  }, [showFilters]);
 
-  // Get unique categories for filter dropdown
-  const categories = [...new Set(equipment.map(item => item.category))]
+  // Close mobile filters
+  const closeFilters = useCallback(() => {
+    setShowFilters(false);
+    document.body.style.overflow = 'unset';
+  }, []);
 
+  // Handle page change
+  const handlePageChange = useCallback((newPage) => {
+    setPagination(prev => ({ ...prev, page: newPage }));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
+  // Get unique categories from API response
+  const categories = [...new Set(equipment.map(item => item.category))].sort();
+
+  // Loading state
   if (loading && equipment.length === 0) {
     return (
       <div className="equipment-list-page">
         <div className="container">
-          <div className="loader-container">
-            <div className="loader">Loading equipment...</div>
+          <div className="loading-state">
+            <div className="spinner"></div>
+            <p>Loading equipment...</p>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="equipment-list-page">
       <div className="container">
+        {/* Page Header */}
         <div className="page-header">
-          <h1>Available Equipment {filters.location ? `in ${filters.location}` : 'Near You'}</h1>
-          <p className="results-count">{filteredEquipment.length} equipment found</p>
+          <h1 className="page-title">
+            Available Equipment {filters.location && `in ${filters.location}`}
+          </h1>
+          <p className="results-count">
+            {pagination.total} {pagination.total === 1 ? 'item' : 'items'} found
+          </p>
         </div>
 
+        {/* Error Message */}
         {error && (
-          <div className="error-message">
-            <i className="fas fa-exclamation-circle"></i>
+          <div className="error-state" role="alert">
+            <span className="error-icon">⚠️</span>
             <p>{error}</p>
-            <button onClick={() => window.location.reload()} className="btn-retry">
+            <button 
+              onClick={fetchEquipment} 
+              className="btn btn-secondary btn-sm"
+            >
               Retry
             </button>
           </div>
         )}
 
+        {/* Mobile Filter Toggle */}
         <button 
-          className="mobile-filter-btn"
-          onClick={() => setShowFilters(!showFilters)}
+          className="mobile-filter-toggle"
+          onClick={toggleFilters}
+          aria-expanded={showFilters}
+          aria-label="Toggle filters"
         >
-          <i className="fas fa-filter"></i> 
+          <svg className="filter-icon" viewBox="0 0 24 24" width="20" height="20">
+            <path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/>
+          </svg>
           {showFilters ? 'Hide Filters' : 'Show Filters'}
         </button>
 
-        <div className="content-wrapper">
+        {/* Main Content */}
+        <div className="content-layout">
           {/* Filters Sidebar */}
-          <div className={`filters-sidebar ${showFilters ? 'show' : ''}`}>
+          <aside 
+            className={`filters-sidebar ${showFilters ? 'show' : ''}`}
+            aria-label="Filter equipment"
+          >
             <div className="filters-header">
-              <h3>Filters</h3>
-              <button onClick={clearFilters} className="clear-filters">
+              <h2>Filters</h2>
+              <button 
+                onClick={clearFilters} 
+                className="clear-filters-btn"
+                aria-label="Clear all filters"
+              >
                 Clear All
+              </button>
+              <button 
+                className="close-filters-btn"
+                onClick={closeFilters}
+                aria-label="Close filters"
+              >
+                ×
               </button>
             </div>
 
-            <div className="filter-group">
-              <label htmlFor="category">Category</label>
-              <select 
-                id="category"
-                name="category" 
-                value={filters.category} 
-                onChange={handleFilterChange}
-              >
-                <option value="">All Categories</option>
-                {categories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-            </div>
+            <div className="filters-content">
+              {/* Category Filter */}
+              <div className="filter-section">
+                <label htmlFor="category-filter" className="filter-label">
+                  Category
+                </label>
+                <select
+                  id="category-filter"
+                  name="category"
+                  value={filters.category}
+                  onChange={handleFilterChange}
+                  className="filter-select"
+                  aria-label="Select category"
+                >
+                  <option value="">All Categories</option>
+                  {categories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="filter-group">
-              <label>Price Range (per hour)</label>
-              <div className="price-inputs">
+              {/* Price Range Filter */}
+              <div className="filter-section">
+                <label className="filter-label">Price Range (per hour)</label>
+                <div className="price-range">
+                  <div className="price-input">
+                    <span className="currency">₹</span>
+                    <input
+                      type="number"
+                      name="minPrice"
+                      placeholder="Min"
+                      value={filters.minPrice}
+                      onChange={handleFilterChange}
+                      min="0"
+                      step="100"
+                      aria-label="Minimum price"
+                    />
+                  </div>
+                  <span className="price-separator">to</span>
+                  <div className="price-input">
+                    <span className="currency">₹</span>
+                    <input
+                      type="number"
+                      name="maxPrice"
+                      placeholder="Max"
+                      value={filters.maxPrice}
+                      onChange={handleFilterChange}
+                      min="0"
+                      step="100"
+                      aria-label="Maximum price"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Location Filter */}
+              <div className="filter-section">
+                <label htmlFor="location-filter" className="filter-label">
+                  Location
+                </label>
                 <input
-                  type="number"
-                  name="minPrice"
-                  placeholder="Min ₹"
-                  value={filters.minPrice}
+                  type="text"
+                  id="location-filter"
+                  name="location"
+                  placeholder="Enter city/area"
+                  value={filters.location}
                   onChange={handleFilterChange}
-                  min="0"
-                />
-                <span>to</span>
-                <input
-                  type="number"
-                  name="maxPrice"
-                  placeholder="Max ₹"
-                  value={filters.maxPrice}
-                  onChange={handleFilterChange}
-                  min="0"
+                  className="filter-input"
+                  aria-label="Enter location"
                 />
               </div>
-            </div>
 
-            <div className="filter-group">
-              <label htmlFor="location">Location</label>
-              <input
-                type="text"
-                id="location"
-                name="location"
-                placeholder="Enter city/area (e.g., Meerut, Delhi)"
-                value={filters.location}
-                onChange={handleFilterChange}
-              />
+              {/* Apply Filters Button (Mobile) */}
+              <button 
+                className="apply-filters-btn"
+                onClick={closeFilters}
+              >
+                Apply Filters
+              </button>
             </div>
-
-            <button className="apply-filters-mobile" onClick={() => setShowFilters(false)}>
-              Apply Filters
-            </button>
-          </div>
+          </aside>
 
           {/* Equipment Grid */}
-          <div className="equipment-grid">
-            {filteredEquipment.map(item => (
-              <EquipmentCard key={item.id} equipment={item} />
-            ))}
-            
-            {!loading && filteredEquipment.length === 0 && (
-              <div className="no-results">
-                <i className="fas fa-search"></i>
-                <h3>No equipment found</h3>
-                <p>Try adjusting your filters to find what you're looking for</p>
-                <button onClick={clearFilters} className="btn-clear-filters">
-                  Clear Filters
+          <main className="equipment-grid-container">
+            <div className="equipment-grid">
+              {equipment.map(item => (
+                <EquipmentCard key={item.id} equipment={item} />
+              ))}
+              
+              {!loading && equipment.length === 0 && !error && (
+                <div className="empty-state">
+                  <div className="empty-icon">🔍</div>
+                  <h3>No equipment found</h3>
+                  <p>Try adjusting your filters to find what you're looking for</p>
+                  <button 
+                    onClick={clearFilters} 
+                    className="btn btn-primary"
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Pagination */}
+            {pagination.pages > 1 && (
+              <div className="pagination">
+                <button
+                  onClick={() => handlePageChange(pagination.page - 1)}
+                  disabled={pagination.page === 1}
+                  className="pagination-btn"
+                  aria-label="Previous page"
+                >
+                  ← Prev
+                </button>
+                
+                <span className="pagination-info">
+                  Page {pagination.page} of {pagination.pages}
+                </span>
+                
+                <button
+                  onClick={() => handlePageChange(pagination.page + 1)}
+                  disabled={pagination.page === pagination.pages}
+                  className="pagination-btn"
+                  aria-label="Next page"
+                >
+                  Next →
                 </button>
               </div>
             )}
-          </div>
+          </main>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default EquipmentList
+export default EquipmentList;

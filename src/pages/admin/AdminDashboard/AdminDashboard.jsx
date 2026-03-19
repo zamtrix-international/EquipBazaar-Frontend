@@ -1,410 +1,500 @@
-// import { useState, useEffect } from 'react'
-// import { Link } from 'react-router-dom'
-// import { adminAPI } from '../../../services/api'
-// import './AdminDashboard.css'
+// pages/admin/AdminDashboard/AdminDashboard.jsx
+import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { adminAPI } from '../../../services/api';
+import './AdminDashboard.css';
 
-// const AdminDashboard = () => {
-//   const [stats, setStats] = useState({
-//     totalUsers: 0,
-//     totalVendors: 0,
-//     totalBookings: 0,
-//     totalRevenue: 0,
-//     pendingVendors: 0
-//   })
-
-//   const [recentVendors, setRecentVendors] = useState([])
-//   const [recentBookings, setRecentBookings] = useState([])
-//   const [loading, setLoading] = useState(true)
-
-//   useEffect(() => {
-//     const fetchDashboardData = async () => {
-//       try {
-//         const [dashboardRes, vendorsRes, bookingsRes] = await Promise.all([
-//           adminAPI.getDashboard(),
-//           adminAPI.getVendors({ limit: 3, sort: 'recent' }),
-//           adminAPI.getBookings({ limit: 3, sort: 'recent' })
-//         ])
-
-//         setStats(dashboardRes.data.stats)
-//         setRecentVendors(vendorsRes.data.vendors || [])
-//         setRecentBookings(bookingsRes.data.bookings || [])
-//       } catch (error) {
-//         console.error('Error fetching dashboard data:', error)
-//         // Fallback to mock data if API fails
-//         setStats({
-//           totalUsers: 1250,
-//           totalVendors: 45,
-//           totalBookings: 380,
-//           totalRevenue: 1250000,
-//           pendingVendors: 8
-//         })
-//         setRecentVendors([
-//           {
-//             id: 1,
-//             name: 'Ramesh Construction',
-//             email: 'ramesh@example.com',
-//             equipment: 'JCB, Tractor',
-//             status: 'pending',
-//             joinedDate: '2024-03-15'
-//           },
-//           {
-//             id: 2,
-//             name: 'Singh Agro Services',
-//             email: 'singh@example.com',
-//             equipment: 'Tractor, Dumper',
-//             status: 'approved',
-//             joinedDate: '2024-03-14'
-//           },
-//           {
-//             id: 3,
-//             name: 'Meerut Crane Services',
-//             email: 'crane@example.com',
-//             equipment: 'Crane',
-//             status: 'pending',
-//             joinedDate: '2024-03-13'
-//           }
-//         ])
-//         setRecentBookings([
-//           {
-//             id: 1,
-//             equipment: 'JCB 3DX',
-//             customer: 'Rajesh Kumar',
-//             vendor: 'Ramesh Construction',
-//             amount: 2400,
-//             status: 'completed',
-//             date: '2024-03-15'
-//           },
-//           {
-//             id: 2,
-//             equipment: 'Tractor',
-//             customer: 'Amit Singh',
-//             vendor: 'Singh Agro',
-//             amount: 1600,
-//             status: 'confirmed',
-//             date: '2024-03-14'
-//           },
-//           {
-//             id: 3,
-//             equipment: 'Crane',
-//             customer: 'Vijay Verma',
-//             vendor: 'Meerut Crane',
-//             amount: 5000,
-//             status: 'pending',
-//             date: '2024-03-13'
-//           }
-//         ])
-//       } finally {
-//         setLoading(false)
-//       }
-//     }
-
-//     fetchDashboardData()
-//   }, [])
-
-//   if (loading) {
-//     return <div className="admin-dashboard">Loading dashboard...</div>
-//   }
-
-//   return (
-//     <div className="admin-dashboard">
-//       <div className="container">
-//         <h1 className="dashboard-title">Admin Dashboard</h1>
-
-//         {/* Stats Cards */}
-//         <div className="stats-grid">
-//           <div className="stat-card">
-//             <div className="stat-icon">
-//               <i className="fas fa-users"></i>
-//             </div>
-//             <div className="stat-details">
-//               <span className="stat-label">Total Users</span>
-//               <span className="stat-value">{stats.totalUsers}</span>
-//             </div>
-//           </div>
-
-//           <div className="stat-card">
-//             <div className="stat-icon">
-//               <i className="fas fa-truck"></i>
-//             </div>
-//             <div className="stat-details">
-//               <span className="stat-label">Total Vendors</span>
-//               <span className="stat-value">{stats.totalVendors}</span>
-//             </div>
-//           </div>
-
-//           <div className="stat-card">
-//             <div className="stat-icon">
-//               <i className="fas fa-calendar-check"></i>
-//             </div>
-//             <div className="stat-details">
-//               <span className="stat-label">Total Bookings</span>
-//               <span className="stat-value">{stats.totalBookings}</span>
-//             </div>
-//           </div>
-
-//           <div className="stat-card">
-//             <div className="stat-icon">
-//               <i className="fas fa-rupee-sign"></i>
-//             </div>
-//             <div className="stat-details">
-//               <span className="stat-label">Total Revenue</span>
-//               <span className="stat-value">₹{stats.totalRevenue}</span>
-//             </div>
-//           </div>
-
-//           <div className="stat-card warning">
-//             <div className="stat-icon">
-//               <i className="fas fa-clock"></i>
-//             </div>
-//             <div className="stat-details">
-//               <span className="stat-label">Pending Vendors</span>
-//               <span className="stat-value">{stats.pendingVendors}</span>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* Quick Actions */}
-//         <div className="quick-actions">
-//           <h2>Quick Actions</h2>
-//           <div className="actions-grid">
-//             <Link to="/admin/vendors" className="action-card">
-//               <i className="fas fa-user-check"></i>
-//               <h3>Verify Vendors</h3>
-//               <p>{stats.pendingVendors} pending approvals</p>
-//             </Link>
-
-//             <Link to="/admin/users" className="action-card">
-//               <i className="fas fa-users-cog"></i>
-//               <h3>Manage Users</h3>
-//               <p>View all customers</p>
-//             </Link>
-
-//             <Link to="/admin/commission" className="action-card">
-//               <i className="fas fa-percent"></i>
-//               <h3>Set Commission</h3>
-//               <p>Update commission rates</p>
-//             </Link>
-
-//             <Link to="/admin/reports" className="action-card">
-//               <i className="fas fa-chart-bar"></i>
-//               <h3>View Reports</h3>
-//               <p>Analytics & insights</p>
-//             </Link>
-//           </div>
-//         </div>
-
-//         {/* Recent Vendors */}
-//         <div className="recent-section">
-//           <div className="section-header">
-//             <h2>Pending Vendor Approvals</h2>
-//             <Link to="/admin/vendors" className="view-all">View All</Link>
-//           </div>
-
-//           <div className="table-responsive">
-//             <table className="data-table">
-//               <thead>
-//                 <tr>
-//                   <th>Vendor Name</th>
-//                   <th>Email</th>
-//                   <th>Equipment</th>
-//                   <th>Joined</th>
-//                   <th>Status</th>
-//                   <th>Action</th>
-//                 </tr>
-//               </thead>
-//               <tbody>
-//                 {recentVendors.map(vendor => (
-//                   <tr key={vendor.id}>
-//                     <td>{vendor.name}</td>
-//                     <td>{vendor.email}</td>
-//                     <td>{vendor.equipment}</td>
-//                     <td>{vendor.joinedDate}</td>
-//                     <td>
-//                       <span className={`status-badge ${vendor.status}`}>
-//                         {vendor.status}
-//                       </span>
-//                     </td>
-//                     <td>
-//                       {vendor.status === 'pending' && (
-//                         <div className="action-buttons">
-//                           <button className="btn-approve">✓ Approve</button>
-//                           <button className="btn-reject">✗ Reject</button>
-//                         </div>
-//                       )}
-//                     </td>
-//                   </tr>
-//                 ))}
-//               </tbody>
-//             </table>
-//           </div>
-//         </div>
-
-//         {/* Recent Bookings */}
-//         <div className="recent-section">
-//           <div className="section-header">
-//             <h2>Recent Bookings</h2>
-//             <Link to="/admin/bookings" className="view-all">View All</Link>
-//           </div>
-
-//           <div className="table-responsive">
-//             <table className="data-table">
-//               <thead>
-//                 <tr>
-//                   <th>Equipment</th>
-//                   <th>Customer</th>
-//                   <th>Vendor</th>
-//                   <th>Amount</th>
-//                   <th>Date</th>
-//                   <th>Status</th>
-//                 </tr>
-//               </thead>
-//               <tbody>
-//                 {recentBookings.map(booking => (
-//                   <tr key={booking.id}>
-//                     <td>{booking.equipment}</td>
-//                     <td>{booking.customer}</td>
-//                     <td>{booking.vendor}</td>
-//                     <td>₹{booking.amount}</td>
-//                     <td>{booking.date}</td>
-//                     <td>
-//                       <span className={`status-badge ${booking.status}`}>
-//                         {booking.status}
-//                       </span>
-//                     </td>
-//                   </tr>
-//                 ))}
-//               </tbody>
-//             </table>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
-// export default AdminDashboard
-
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { adminAPI } from '../../../services/api'
-import './AdminDashboard.css'
+// Icon Components
+const Icons = {
+  Users: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+      <circle cx="9" cy="7" r="4"></circle>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+    </svg>
+  ),
+  Truck: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="1" y="3" width="15" height="13"></rect>
+      <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+      <circle cx="5.5" cy="18.5" r="2.5"></circle>
+      <circle cx="18.5" cy="18.5" r="2.5"></circle>
+    </svg>
+  ),
+  CalendarCheck: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+      <line x1="16" y1="2" x2="16" y2="6"></line>
+      <line x1="8" y1="2" x2="8" y2="6"></line>
+      <line x1="3" y1="10" x2="21" y2="10"></line>
+      <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"></path>
+    </svg>
+  ),
+  Rupee: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M6 3h12M6 8h12M14 18l4 3M6 13h8a4 4 0 0 0 0-8H6"></path>
+    </svg>
+  ),
+  Clock: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10"></circle>
+      <polyline points="12 6 12 12 16 14"></polyline>
+    </svg>
+  ),
+  UserCheck: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+      <circle cx="8.5" cy="7" r="4"></circle>
+      <polyline points="17 11 19 13 23 9"></polyline>
+    </svg>
+  ),
+  UsersCog: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+      <circle cx="8.5" cy="7" r="4"></circle>
+      <circle cx="20" cy="8" r="2.5"></circle>
+      <path d="M22 12V8a5 5 0 0 0-5-5h-5"></path>
+    </svg>
+  ),
+  Percent: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="19" y1="5" x2="5" y2="19"></line>
+      <circle cx="6.5" cy="6.5" r="2.5"></circle>
+      <circle cx="17.5" cy="17.5" r="2.5"></circle>
+    </svg>
+  ),
+  ChartBar: () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="18" y1="20" x2="18" y2="10"></line>
+      <line x1="12" y1="20" x2="12" y2="4"></line>
+      <line x1="6" y1="20" x2="6" y2="14"></line>
+    </svg>
+  ),
+  Check: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+  ),
+  X: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  ),
+  Spinner: () => (
+    <svg className="spinner" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10"></circle>
+      <path d="M12 2v4M12 22v-4M4 12H2M22 12h-2M19.07 4.93l-2.83 2.83M6.9 17.1l-2.82 2.82M17.1 6.9l2.82-2.82M4.93 19.07l2.83-2.83"></path>
+    </svg>
+  )
+};
 
 const AdminDashboard = () => {
-  const [stats, setStats] = useState({ totalUsers: 0, totalVendors: 0, totalBookings: 0, totalRevenue: 0, pendingVendors: 0 })
-  const [recentVendors, setRecentVendors] = useState([])
-  const [recentBookings, setRecentBookings] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalVendors: 0,
+    totalBookings: 0,
+    totalRevenue: 0,
+    pendingVendors: 0
+  });
 
+  const [recentVendors, setRecentVendors] = useState([]);
+  const [recentBookings, setRecentBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [processingId, setProcessingId] = useState(null);
+
+  // Handle vendor approval/rejection
   const handleVendorAction = async (vendorId, newStatus) => {
+    setProcessingId(vendorId);
+    setError('');
+
     try {
-      await adminAPI.updateVendorStatus(vendorId, newStatus)
-      setRecentVendors(prev => prev.map(v => v.id === vendorId ? { ...v, status: newStatus } : v))
-    } catch (error) {
-      console.error('Error updating vendor:', error)
-      alert('Failed to update vendor status.')
+      const response = await adminAPI.updateVendorStatus(vendorId, newStatus);
+      
+      if (response?.data?.success) {
+        setRecentVendors(prev => 
+          prev.map(v => v.id === vendorId ? { ...v, status: newStatus } : v)
+        );
+        
+        // Update pending vendors count
+        if (newStatus === 'approved' || newStatus === 'suspended') {
+          setStats(prev => ({
+            ...prev,
+            pendingVendors: prev.pendingVendors - 1
+          }));
+        }
+      } else {
+        throw new Error(response?.data?.message || 'Failed to update vendor status');
+      }
+    } catch (err) {
+      console.error('Error updating vendor:', err);
+      setError(err.message || 'Failed to update vendor status');
+    } finally {
+      setProcessingId(null);
     }
-  }
+  };
+
+  // Fetch dashboard data
+  const fetchDashboardData = useCallback(async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const [dashboardRes, vendorsRes, bookingsRes] = await Promise.all([
+        adminAPI.getDashboard(),
+        adminAPI.getVendors({ limit: 5, sort: '-createdAt' }),
+        adminAPI.getBookings({ limit: 5, sort: '-createdAt' })
+      ]);
+
+      // Handle dashboard stats
+      if (dashboardRes?.data?.success) {
+        setStats(dashboardRes.data.data || {
+          totalUsers: 0,
+          totalVendors: 0,
+          totalBookings: 0,
+          totalRevenue: 0,
+          pendingVendors: 0
+        });
+      } else if (dashboardRes?.data) {
+        setStats(dashboardRes.data);
+      } else {
+        throw new Error(dashboardRes?.data?.message || 'Failed to fetch dashboard data');
+      }
+
+      // Handle vendors
+      if (vendorsRes?.data?.success) {
+        setRecentVendors(vendorsRes.data.data.vendors || []);
+      } else if (vendorsRes?.data?.vendors) {
+        setRecentVendors(vendorsRes.data.vendors);
+      } else {
+        setRecentVendors([]);
+      }
+
+      // Handle bookings
+      if (bookingsRes?.data?.success) {
+        setRecentBookings(bookingsRes.data.data.bookings || []);
+      } else if (bookingsRes?.data?.bookings) {
+        setRecentBookings(bookingsRes.data.bookings);
+      } else {
+        setRecentBookings([]);
+      }
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      setError(err.message || 'Failed to load dashboard data. Please try again.');
+      
+      // Reset to empty - NO MOCK DATA
+      setStats({
+        totalUsers: 0,
+        totalVendors: 0,
+        totalBookings: 0,
+        totalRevenue: 0,
+        pendingVendors: 0
+      });
+      setRecentVendors([]);
+      setRecentBookings([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const [dashboardRes, vendorsRes, bookingsRes] = await Promise.all([
-          adminAPI.getDashboard(),
-          adminAPI.getVendors({ limit: 3, sort: 'recent' }),
-          adminAPI.getBookings({ limit: 3, sort: 'recent' })
-        ])
-        setStats(dashboardRes.data.stats)
-        setRecentVendors(vendorsRes.data.vendors || [])
-        setRecentBookings(bookingsRes.data.bookings || [])
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error)
-        setStats({ totalUsers: 1250, totalVendors: 45, totalBookings: 380, totalRevenue: 1250000, pendingVendors: 8 })
-        setRecentVendors([
-          { id: 1, name: 'Ramesh Construction', email: 'ramesh@example.com', equipment: 'JCB, Tractor', status: 'pending', joinedDate: '2024-03-15' },
-          { id: 2, name: 'Singh Agro Services', email: 'singh@example.com', equipment: 'Tractor, Dumper', status: 'approved', joinedDate: '2024-03-14' },
-          { id: 3, name: 'Meerut Crane Services', email: 'crane@example.com', equipment: 'Crane', status: 'pending', joinedDate: '2024-03-13' }
-        ])
-        setRecentBookings([
-          { id: 1, equipment: 'JCB 3DX', customer: 'Rajesh Kumar', vendor: 'Ramesh Construction', amount: 2400, status: 'completed', date: '2024-03-15' },
-          { id: 2, equipment: 'Tractor', customer: 'Amit Singh', vendor: 'Singh Agro', amount: 1600, status: 'confirmed', date: '2024-03-14' },
-          { id: 3, equipment: 'Crane', customer: 'Vijay Verma', vendor: 'Meerut Crane', amount: 5000, status: 'pending', date: '2024-03-13' }
-        ])
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchDashboardData()
-  }, [])
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
-  if (loading) return <div className="admin-dashboard">Loading dashboard...</div>
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  // Format date
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const options = { day: 'numeric', month: 'short', year: 'numeric' };
+    return new Date(dateString).toLocaleDateString('en-IN', options);
+  };
+
+  // Get status class
+  const getStatusClass = (status) => {
+    const statusMap = {
+      'pending': 'status-pending',
+      'approved': 'status-approved',
+      'suspended': 'status-suspended',
+      'completed': 'status-completed',
+      'confirmed': 'status-confirmed',
+      'cancelled': 'status-cancelled'
+    };
+    return statusMap[status?.toLowerCase()] || 'status-pending';
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="admin-dashboard">
+        <div className="container">
+          <div className="loading-state">
+            <Icons.Spinner />
+            <p>Loading dashboard data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-dashboard">
       <div className="container">
         <h1 className="dashboard-title">Admin Dashboard</h1>
+
+        {/* Error Message */}
+        {error && (
+          <div className="error-message">
+            <span>⚠️</span>
+            <p>{error}</p>
+            <button onClick={fetchDashboardData} className="retry-btn">
+              Retry
+            </button>
+          </div>
+        )}
+
+        {/* Stats Cards */}
         <div className="stats-grid">
-          <div className="stat-card"><div className="stat-icon"><i className="fas fa-users"></i></div><div className="stat-details"><span className="stat-label">Total Users</span><span className="stat-value">{stats.totalUsers}</span></div></div>
-          <div className="stat-card"><div className="stat-icon"><i className="fas fa-truck"></i></div><div className="stat-details"><span className="stat-label">Total Vendors</span><span className="stat-value">{stats.totalVendors}</span></div></div>
-          <div className="stat-card"><div className="stat-icon"><i className="fas fa-calendar-check"></i></div><div className="stat-details"><span className="stat-label">Total Bookings</span><span className="stat-value">{stats.totalBookings}</span></div></div>
-          <div className="stat-card"><div className="stat-icon"><i className="fas fa-rupee-sign"></i></div><div className="stat-details"><span className="stat-label">Total Revenue</span><span className="stat-value">₹{stats.totalRevenue}</span></div></div>
-          <div className="stat-card warning"><div className="stat-icon"><i className="fas fa-clock"></i></div><div className="stat-details"><span className="stat-label">Pending Vendors</span><span className="stat-value">{stats.pendingVendors}</span></div></div>
+          <div className="stat-card stat-total">
+            <div className="stat-icon">
+              <Icons.Users />
+            </div>
+            <div className="stat-details">
+              <span className="stat-label">Total Users</span>
+              <span className="stat-value">{stats.totalUsers}</span>
+            </div>
+          </div>
+
+          <div className="stat-card stat-vendors">
+            <div className="stat-icon">
+              <Icons.Truck />
+            </div>
+            <div className="stat-details">
+              <span className="stat-label">Total Vendors</span>
+              <span className="stat-value">{stats.totalVendors}</span>
+            </div>
+          </div>
+
+          <div className="stat-card stat-bookings">
+            <div className="stat-icon">
+              <Icons.CalendarCheck />
+            </div>
+            <div className="stat-details">
+              <span className="stat-label">Total Bookings</span>
+              <span className="stat-value">{stats.totalBookings}</span>
+            </div>
+          </div>
+
+          <div className="stat-card stat-revenue">
+            <div className="stat-icon">
+              <Icons.Rupee />
+            </div>
+            <div className="stat-details">
+              <span className="stat-label">Total Revenue</span>
+              <span className="stat-value">{formatCurrency(stats.totalRevenue)}</span>
+            </div>
+          </div>
+
+          <div className="stat-card stat-pending">
+            <div className="stat-icon">
+              <Icons.Clock />
+            </div>
+            <div className="stat-details">
+              <span className="stat-label">Pending Vendors</span>
+              <span className="stat-value">{stats.pendingVendors}</span>
+            </div>
+          </div>
         </div>
 
+        {/* Quick Actions */}
         <div className="quick-actions">
           <h2>Quick Actions</h2>
           <div className="actions-grid">
-            <Link to="/admin/vendors" className="action-card"><i className="fas fa-user-check"></i><h3>Verify Vendors</h3><p>{stats.pendingVendors} pending approvals</p></Link>
-            <Link to="/admin/users" className="action-card"><i className="fas fa-users-cog"></i><h3>Manage Users</h3><p>View all customers</p></Link>
-            <Link to="/admin/commission" className="action-card"><i className="fas fa-percent"></i><h3>Set Commission</h3><p>Update commission rates</p></Link>
-            <Link to="/admin/reports" className="action-card"><i className="fas fa-chart-bar"></i><h3>View Reports</h3><p>Analytics & insights</p></Link>
+            <Link to="/admin/vendors" className="action-card">
+              <Icons.UserCheck />
+              <h3>Verify Vendors</h3>
+              <p>{stats.pendingVendors} pending {stats.pendingVendors === 1 ? 'approval' : 'approvals'}</p>
+            </Link>
+
+            <Link to="/admin/users" className="action-card">
+              <Icons.UsersCog />
+              <h3>Manage Users</h3>
+              <p>View all customers</p>
+            </Link>
+
+            <Link to="/admin/commission" className="action-card">
+              <Icons.Percent />
+              <h3>Set Commission</h3>
+              <p>Update commission rates</p>
+            </Link>
+
+            <Link to="/admin/reports" className="action-card">
+              <Icons.ChartBar />
+              <h3>View Reports</h3>
+              <p>Analytics & insights</p>
+            </Link>
           </div>
         </div>
 
+        {/* Recent Vendors */}
         <div className="recent-section">
-          <div className="section-header"><h2>Pending Vendor Approvals</h2><Link to="/admin/vendors" className="view-all">View All</Link></div>
-          <div className="table-responsive">
-            <table className="data-table">
-              <thead><tr><th>Vendor Name</th><th>Email</th><th>Equipment</th><th>Joined</th><th>Status</th><th>Action</th></tr></thead>
-              <tbody>
-                {recentVendors.map(vendor => (
-                  <tr key={vendor.id}>
-                    <td>{vendor.name}</td><td>{vendor.email}</td><td>{vendor.equipment}</td><td>{vendor.joinedDate}</td>
-                    <td><span className={`status-badge ${vendor.status}`}>{vendor.status}</span></td>
-                    <td>
-                      {vendor.status === 'pending' && (
-                        <div className="action-buttons">
-                          <button className="btn-approve" onClick={() => handleVendorAction(vendor.id, 'approved')}>✓ Approve</button>
-                          <button className="btn-reject" onClick={() => handleVendorAction(vendor.id, 'suspended')}>✗ Reject</button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="section-header">
+            <h2>Pending Vendor Approvals</h2>
+            <Link to="/admin/vendors" className="view-all">
+              View All {recentVendors.length > 0 && `(${recentVendors.length})`}
+            </Link>
           </div>
+
+          {recentVendors.length === 0 ? (
+            <div className="empty-state">
+              <p>No pending vendor approvals</p>
+            </div>
+          ) : (
+            <div className="table-responsive">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Vendor Name</th>
+                    <th>Email</th>
+                    <th>Equipment</th>
+                    <th>Joined</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentVendors.map(vendor => (
+                    <tr key={vendor.id}>
+                      <td>
+                        <span className="vendor-name">{vendor.name}</span>
+                      </td>
+                      <td>
+                        <span className="vendor-email">{vendor.email}</span>
+                      </td>
+                      <td>
+                        <span className="vendor-equipment">{vendor.equipment}</span>
+                      </td>
+                      <td>
+                        <span className="vendor-date">{formatDate(vendor.joinedDate)}</span>
+                      </td>
+                      <td>
+                        <span className={`status-badge ${getStatusClass(vendor.status)}`}>
+                          {vendor.status}
+                        </span>
+                      </td>
+                      <td>
+                        {vendor.status === 'pending' && (
+                          <div className="action-buttons">
+                            <button 
+                              className="btn-approve"
+                              onClick={() => handleVendorAction(vendor.id, 'approved')}
+                              disabled={processingId === vendor.id}
+                              title="Approve Vendor"
+                            >
+                              {processingId === vendor.id ? (
+                                <span className="spinner-small"></span>
+                              ) : (
+                                <>
+                                  <Icons.Check />
+                                  <span>Approve</span>
+                                </>
+                              )}
+                            </button>
+                            <button 
+                              className="btn-reject"
+                              onClick={() => handleVendorAction(vendor.id, 'suspended')}
+                              disabled={processingId === vendor.id}
+                              title="Reject Vendor"
+                            >
+                              {processingId === vendor.id ? (
+                                <span className="spinner-small"></span>
+                              ) : (
+                                <>
+                                  <Icons.X />
+                                  <span>Reject</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
+        {/* Recent Bookings */}
         <div className="recent-section">
-          <div className="section-header"><h2>Recent Bookings</h2><Link to="/admin/bookings" className="view-all">View All</Link></div>
-          <div className="table-responsive">
-            <table className="data-table">
-              <thead><tr><th>Equipment</th><th>Customer</th><th>Vendor</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
-              <tbody>
-                {recentBookings.map(booking => (
-                  <tr key={booking.id}>
-                    <td>{booking.equipment}</td><td>{booking.customer}</td><td>{booking.vendor}</td>
-                    <td>₹{booking.amount}</td><td>{booking.date}</td>
-                    <td><span className={`status-badge ${booking.status}`}>{booking.status}</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="section-header">
+            <h2>Recent Bookings</h2>
+            <Link to="/admin/bookings" className="view-all">
+              View All {recentBookings.length > 0 && `(${recentBookings.length})`}
+            </Link>
           </div>
+
+          {recentBookings.length === 0 ? (
+            <div className="empty-state">
+              <p>No recent bookings</p>
+            </div>
+          ) : (
+            <div className="table-responsive">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Equipment</th>
+                    <th>Customer</th>
+                    <th>Vendor</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentBookings.map(booking => (
+                    <tr key={booking.id}>
+                      <td>
+                        <span className="booking-equipment">{booking.equipment}</span>
+                      </td>
+                      <td>
+                        <span className="booking-customer">{booking.customer}</span>
+                      </td>
+                      <td>
+                        <span className="booking-vendor">{booking.vendor}</span>
+                      </td>
+                      <td>
+                        <span className="booking-amount">{formatCurrency(booking.amount)}</span>
+                      </td>
+                      <td>
+                        <span className="booking-date">{formatDate(booking.date)}</span>
+                      </td>
+                      <td>
+                        <span className={`status-badge ${getStatusClass(booking.status)}`}>
+                          {booking.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AdminDashboard
+export default AdminDashboard;

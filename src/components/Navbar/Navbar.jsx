@@ -54,7 +54,7 @@ const Navbar = () => {
                 Login
               </button>
               <button 
-                className="btn-outline" 
+                className="btn-primary" 
                 onClick={() => {
                   navigate('/signup');
                   setIsMenuOpen(false);
