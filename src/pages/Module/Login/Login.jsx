@@ -6,9 +6,9 @@ import './Login.css'
 const Login = () => {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
-    email: '',
+    phoneOrEmail: '',  // email ऐवजी phoneOrEmail
     password: '',
-    role: 'customer'
+    role: 'CUSTOMER'   // uppercase मध्ये role
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -27,21 +27,28 @@ const Login = () => {
     setError('')
 
     try {
-      const response = await authAPI.login(formData)
+      // Postman प्रमाणे फक्त phoneOrEmail आणि password पाठवा
+      const loginData = {
+        phoneOrEmail: formData.phoneOrEmail,
+        password: formData.password
+      }
+      
+      const response = await authAPI.login(loginData)
       
       if (response.data && response.data.data) {
         const { token, user } = response.data.data
         localStorage.setItem('token', token)
         localStorage.setItem('user', JSON.stringify(user))
         
+        // Backend मध्ये role uppercase मध्ये येतो
         switch(user.role) {
-          case 'customer':
+          case 'CUSTOMER':
             navigate('/customer/dashboard')
             break
-          case 'vendor':
+          case 'VENDOR':
             navigate('/vendor/dashboard')
             break
-          case 'admin':
+          case 'ADMIN':
             navigate('/admin/dashboard')
             break
           default:
@@ -60,20 +67,20 @@ const Login = () => {
     <div className="login-container">
       <div className="login-box">
         <h2>Welcome Back</h2>
-        <p>Login to your EquipNest account</p>
+        <p>Login to your EquipBazzar account</p>
 
         {error && <div className="error-message">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Email</label>
+            <label>Email or Phone</label>
             <input
-              type="email"
-              name="email"
-              value={formData.email}
+              type="text"
+              name="phoneOrEmail"
+              value={formData.phoneOrEmail}
               onChange={handleChange}
               required
-              placeholder="Enter your email"
+              placeholder="Enter your email or phone"
             />
           </div>
 
@@ -87,15 +94,6 @@ const Login = () => {
               required
               placeholder="Enter your password"
             />
-          </div>
-
-          <div className="form-group">
-            <label>Login as</label>
-            <select name="role" value={formData.role} onChange={handleChange}>
-              <option value="customer">Customer</option>
-              <option value="vendor">Vendor/Driver</option>
-              <option value="admin">Admin</option>
-            </select>
           </div>
 
           <button type="submit" className="login-btn" disabled={loading}>

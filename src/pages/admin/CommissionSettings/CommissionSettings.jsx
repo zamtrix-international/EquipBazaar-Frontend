@@ -1,6 +1,6 @@
 // pages/admin/CommissionSettings/CommissionSettings.jsx
 import { useState, useEffect, useCallback } from 'react';
-import { adminAPI } from '../../../services/api';
+import { commissionAPI } from '../../../services/api';
 import './CommissionSettings.css';
 
 // Icon Components
@@ -58,12 +58,14 @@ const CommissionSettings = () => {
     setSuccess('');
 
     try {
-      const response = await adminAPI.getCommissionRules();
+      const response = await commissionAPI.getCommissionRule();
 
       if (response?.data?.success) {
-        setCommissionRules(response.data.data.rules || []);
+        setCommissionRules(response.data.data.rules || [response.data.data]);
       } else if (response?.data?.rules) {
         setCommissionRules(response.data.rules);
+      } else if (response?.data) {
+        setCommissionRules([response.data]);
       } else {
         throw new Error(response?.data?.message || 'Failed to fetch commission rules');
       }
@@ -119,7 +121,7 @@ const CommissionSettings = () => {
     setSuccess('');
 
     try {
-      const response = await adminAPI.updateCommissionRules({ rules: commissionRules });
+      const response = await commissionAPI.updateCommissionRule({ rules: commissionRules });
 
       if (response?.data?.success) {
         setSuccess('Commission rules updated successfully!');

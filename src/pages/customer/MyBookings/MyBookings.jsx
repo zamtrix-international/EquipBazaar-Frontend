@@ -146,7 +146,7 @@ const MyBookings = () => {
     if (!window.confirm('Are you sure you want to cancel this booking?')) return;
 
     try {
-      const response = await bookingAPI.cancelBooking(bookingId);
+      const response = await bookingAPI.updateStatus(bookingId, 'cancelled');
       
       if (response?.data?.success) {
         // Refresh bookings after cancellation

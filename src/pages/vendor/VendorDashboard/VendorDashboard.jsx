@@ -102,19 +102,20 @@ const VendorDashboard = () => {
     setError('');
 
     try {
-      let response;
-      if (action === 'accept') {
-        response = await bookingAPI.acceptBooking(bookingId);
-      } else {
-        response = await bookingAPI.rejectBooking(bookingId);
-      }
+      const statusMap = {
+        accept: 'confirmed',
+        reject: 'rejected'
+      };
+      
+      const newStatus = statusMap[action];
+      const response = await bookingAPI.updateStatus(bookingId, newStatus);
 
       if (response?.data?.success) {
         // Update local state
         setRecentBookings(prev => 
           prev.map(b => 
             b.id === bookingId 
-              ? { ...b, status: action === 'accept' ? 'confirmed' : 'cancelled' }
+              ? { ...b, status: newStatus }
               : b
           )
         );

@@ -1,6 +1,6 @@
 // pages/vendor/Earnings/Earnings.jsx
 import { useState, useEffect, useCallback } from 'react';
-import { vendorAPI } from '../../../services/api';
+import { vendorAPI, payoutAPI } from '../../../services/api';
 import './Earnings.css';
 
 // Icon Components
@@ -138,7 +138,7 @@ const Earnings = () => {
     setError('');
 
     try {
-      const response = await vendorAPI.withdrawEarnings({
+      const response = await payoutAPI.createWithdrawalRequest({
         amount: availableAmount
       });
 

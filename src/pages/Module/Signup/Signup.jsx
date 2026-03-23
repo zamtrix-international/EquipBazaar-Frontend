@@ -11,7 +11,10 @@ const Signup = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    role: 'customer'
+    role: 'CUSTOMER',  // uppercase
+    businessName: '',  // vendor साठी
+    ownerName: '',     // vendor साठी
+    city: ''           // vendor साठी
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -37,12 +40,20 @@ const Signup = () => {
     }
 
     try {
+      // Postman प्रमाणे signup data बनवा
       const signupData = {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
         role: formData.role
+      }
+
+      // जर role VENDOR असेल तर extra fields add करा
+      if (formData.role === 'VENDOR') {
+        signupData.businessName = formData.businessName
+        signupData.ownerName = formData.ownerName
+        signupData.city = formData.city
       }
 
       const response = await authAPI.register(signupData)
@@ -62,7 +73,7 @@ const Signup = () => {
     <div className="signup-container">
       <div className="signup-box">
         <h2>Create Account</h2>
-        <p>Join EquipNest today</p>
+        <p>Join EquipBazzar today</p>
 
         {error && <div className="error-message">{error}</div>}
 
@@ -130,10 +141,51 @@ const Signup = () => {
           <div className="form-group">
             <label>I want to</label>
             <select name="role" value={formData.role} onChange={handleChange}>
-              <option value="customer">Rent Equipment (Customer)</option>
-              <option value="vendor">List Equipment (Vendor)</option>
+              <option value="CUSTOMER">Rent Equipment (Customer)</option>
+              <option value="VENDOR">List Equipment (Vendor)</option>
             </select>
           </div>
+
+          {/* Vendor साठी extra fields */}
+          {formData.role === 'VENDOR' && (
+            <>
+              <div className="form-group">
+                <label>Business Name</label>
+                <input
+                  type="text"
+                  name="businessName"
+                  value={formData.businessName}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your business name"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Owner Name</label>
+                <input
+                  type="text"
+                  name="ownerName"
+                  value={formData.ownerName}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter owner name"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>City</label>
+                <input
+                  type="text"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your city"
+                />
+              </div>
+            </>
+          )}
 
           <button type="submit" className="signup-btn" disabled={loading}>
             {loading ? 'Creating account...' : 'Sign Up'}

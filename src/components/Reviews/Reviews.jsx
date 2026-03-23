@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { equipmentAPI } from '../../services/api'
+import { reviewAPI } from '../../services/api'
 import './Reviews.css'
 
 const Reviews = ({ equipmentId }) => {
@@ -15,8 +15,8 @@ const Reviews = ({ equipmentId }) => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await equipmentAPI.getReviews(equipmentId)
-        setReviews(response.data.reviews || [])
+        const response = await reviewAPI.getEquipmentReviews(equipmentId)
+        setReviews(response.data.reviews || response.data || [])
       } catch (error) {
         console.error('Error fetching reviews:', error)
         // Fallback to mock data
@@ -61,8 +61,8 @@ const Reviews = ({ equipmentId }) => {
     setSubmitting(true)
 
     try {
-      const response = await equipmentAPI.addReview(equipmentId, newReview)
-      setReviews([response.data.review, ...reviews])
+      const response = await reviewAPI.createReview(equipmentId, newReview)
+      setReviews([response.data.review || newReview, ...reviews])
       setNewReview({ rating: 5, comment: '' })
       setShowReviewForm(false)
       alert('Review submitted successfully!')

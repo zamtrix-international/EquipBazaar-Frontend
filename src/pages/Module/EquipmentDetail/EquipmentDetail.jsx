@@ -54,14 +54,14 @@ const EquipmentDetail = () => {
 
       setCheckingAvailability(true);
       try {
-        const response = await equipmentAPI.checkAvailability(id, {
+        const response = await equipmentAPI.getAvailability(id, {
           date: bookingDate.toISOString().split('T')[0],
           duration: selectedDuration,
           hours: selectedDuration === 'hourly' ? bookingHours : null
         });
 
-        if (response?.data?.success) {
-          setAvailability(response.data.data);
+        if (response?.data?.success || response?.data?.available !== undefined) {
+          setAvailability(response.data);
         }
       } catch (err) {
         console.error('Availability check error:', err);

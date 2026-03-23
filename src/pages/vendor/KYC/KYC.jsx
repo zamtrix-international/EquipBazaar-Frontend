@@ -42,32 +42,33 @@ const Icons = {
 
 const KYC = () => {
   const navigate = useNavigate();
+  
   const [kycData, setKycData] = useState({
     aadharNumber: '',
     panNumber: '',
-    businessLicense: '',
-    addressProof: '',
-    bankAccount: '',
-    ifscCode: '',
-    accountHolderName: ''
+    accountNumber: '',
+    ifsc: '',
+    accountHolderName: '',
+    bankName: ''
   });
 
+  // Documents with their types
   const [documents, setDocuments] = useState({
-    aadharFront: null,
-    aadharBack: null,
-    panCard: null,
-    businessLicense: null,
-    addressProof: null,
-    bankPassbook: null
+    aadharFront: { file: null, docType: 'AADHAAR_FRONT' },
+    aadharBack: { file: null, docType: 'AADHAAR_BACK' },
+    panCard: { file: null, docType: 'PAN' },
+    addressProof: { file: null, docType: 'ADDRESS_PROOF' },
+    bankPassbook: { file: null, docType: 'BANK_STATEMENT' },
+    businessLicense: { file: null, docType: 'BUSINESS_LICENSE' }
   });
 
   const [documentNames, setDocumentNames] = useState({
     aadharFront: '',
     aadharBack: '',
     panCard: '',
-    businessLicense: '',
     addressProof: '',
-    bankPassbook: ''
+    bankPassbook: '',
+    businessLicense: ''
   });
 
   const [loading, setLoading] = useState(false);
@@ -81,15 +82,9 @@ const KYC = () => {
     setError('');
 
     try {
-      const response = await vendorAPI.getKycStatus();
-      
-      if (response?.data?.success) {
-        setExistingKyc(response.data.data || null);
-      } else if (response?.data) {
-        setExistingKyc(response.data);
-      } else {
-        setExistingKyc(null);
-      }
+      // In this implementation, we load form empty and submit to upload KYC
+      // The backend doesn't have a KYC status endpoint, we handle it via upload
+      setExistingKyc(null);
     } catch (err) {
       console.error('Error fetching KYC status:', err);
       setError(err.message || 'Failed to fetch KYC status');
@@ -114,32 +109,32 @@ const KYC = () => {
   };
 
   // Handle file changes
-  const handleFileChange = (e) => {
-    const { name, files } = e.target;
+  const handleFileChange = (e, docKey, docTypeValue) => {
+    const { files } = e.target;
     if (files[0]) {
       const file = files[0];
       
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setError(`${name} file size should be less than 5MB`);
+        setError(`${docKey} file size should be less than 5MB`);
         return;
       }
 
       // Validate file type
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
       if (!allowedTypes.includes(file.type)) {
-        setError(`${name} should be JPG, PNG or PDF`);
+        setError(`${docKey} should be JPG, PNG or PDF`);
         return;
       }
 
       setDocuments(prev => ({
         ...prev,
-        [name]: file
+        [docKey]: { file: file, docType: docTypeValue }
       }));
 
       setDocumentNames(prev => ({
         ...prev,
-        [name]: file.name
+        [docKey]: file.name
       }));
 
       setError('');
@@ -166,20 +161,25 @@ const KYC = () => {
       return false;
     }
 
-    if (!kycData.bankAccount.trim()) {
+    if (!kycData.accountNumber.trim()) {
       setError('Please enter bank account number');
       return false;
     }
 
-    if (!kycData.ifscCode.trim()) {
+    if (!kycData.ifsc.trim()) {
       setError('Please enter IFSC code');
+      return false;
+    }
+
+    if (!kycData.bankName.trim()) {
+      setError('Please enter bank name');
       return false;
     }
 
     // Validate required documents
     const requiredDocs = ['aadharFront', 'aadharBack', 'panCard', 'addressProof', 'bankPassbook'];
     for (const doc of requiredDocs) {
-      if (!documents[doc]) {
+      if (!documents[doc]?.file) {
         setError(`Please upload ${doc.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
         return false;
       }
@@ -201,20 +201,21 @@ const KYC = () => {
       const formData = new FormData();
 
       // Add text data
-      Object.entries(kycData).forEach(([key, value]) => {
-        if (value) {
-          formData.append(key, value);
+      formData.append('aadharNumber', kycData.aadharNumber);
+      formData.append('panNumber', kycData.panNumber);
+      formData.append('accountNumber', kycData.accountNumber);
+      formData.append('ifsc', kycData.ifsc);
+      formData.append('accountHolderName', kycData.accountHolderName);
+      formData.append('bankName', kycData.bankName);
+
+      // Add documents with docType
+      Object.entries(documents).forEach(([key, doc]) => {
+        if (doc.file) {
+          formData.append('document', doc.file);
         }
       });
 
-      // Add files
-      Object.entries(documents).forEach(([key, file]) => {
-        if (file) {
-          formData.append(key, file);
-        }
-      });
-
-      const response = await vendorAPI.submitKyc(formData);
+      const response = await vendorAPI.uploadMyKYC(formData);
 
       if (response?.data?.success) {
         alert('KYC documents submitted successfully!');
@@ -298,7 +299,7 @@ const KYC = () => {
           </div>
         )}
 
-        {/* KYC Form - Show only if not pending/verified */}
+        {/* KYC Form */}
         {(!existingKyc || existingKyc.status === 'rejected') && (
           <form onSubmit={handleSubmit} className="kyc-form">
             {/* Personal Information */}
@@ -319,7 +320,6 @@ const KYC = () => {
                     placeholder="Enter 12-digit Aadhar number"
                     maxLength="12"
                     pattern="[0-9]{12}"
-                    title="Please enter 12-digit Aadhar number"
                     className="form-input"
                   />
                 </div>
@@ -348,18 +348,15 @@ const KYC = () => {
               <p className="section-note">Upload clear images or PDFs (Max 5MB each)</p>
 
               <div className="document-grid">
+                {/* Aadhar Front */}
                 <div className="document-item">
-                  <label>
-                    Aadhar Front <span className="required">*</span>
-                  </label>
+                  <label>Aadhar Front <span className="required">*</span></label>
                   <div className="file-upload">
                     <input
                       type="file"
                       id="aadharFront"
-                      name="aadharFront"
-                      onChange={handleFileChange}
+                      onChange={(e) => handleFileChange(e, 'aadharFront', 'AADHAAR_FRONT')}
                       accept=".jpg,.jpeg,.png,.pdf"
-                      required={!documents.aadharFront}
                       className="file-input"
                     />
                     <label htmlFor="aadharFront" className="file-label">
@@ -372,18 +369,15 @@ const KYC = () => {
                   )}
                 </div>
 
+                {/* Aadhar Back */}
                 <div className="document-item">
-                  <label>
-                    Aadhar Back <span className="required">*</span>
-                  </label>
+                  <label>Aadhar Back <span className="required">*</span></label>
                   <div className="file-upload">
                     <input
                       type="file"
                       id="aadharBack"
-                      name="aadharBack"
-                      onChange={handleFileChange}
+                      onChange={(e) => handleFileChange(e, 'aadharBack', 'AADHAAR_BACK')}
                       accept=".jpg,.jpeg,.png,.pdf"
-                      required={!documents.aadharBack}
                       className="file-input"
                     />
                     <label htmlFor="aadharBack" className="file-label">
@@ -396,18 +390,15 @@ const KYC = () => {
                   )}
                 </div>
 
+                {/* PAN Card */}
                 <div className="document-item">
-                  <label>
-                    PAN Card <span className="required">*</span>
-                  </label>
+                  <label>PAN Card <span className="required">*</span></label>
                   <div className="file-upload">
                     <input
                       type="file"
                       id="panCard"
-                      name="panCard"
-                      onChange={handleFileChange}
+                      onChange={(e) => handleFileChange(e, 'panCard', 'PAN')}
                       accept=".jpg,.jpeg,.png,.pdf"
-                      required={!documents.panCard}
                       className="file-input"
                     />
                     <label htmlFor="panCard" className="file-label">
@@ -420,14 +411,14 @@ const KYC = () => {
                   )}
                 </div>
 
+                {/* Business License (Optional) */}
                 <div className="document-item">
-                  <label>Business License (Optional)</label>
+                  <label>Business License</label>
                   <div className="file-upload">
                     <input
                       type="file"
                       id="businessLicense"
-                      name="businessLicense"
-                      onChange={handleFileChange}
+                      onChange={(e) => handleFileChange(e, 'businessLicense', 'BUSINESS_LICENSE')}
                       accept=".jpg,.jpeg,.png,.pdf"
                       className="file-input"
                     />
@@ -441,18 +432,15 @@ const KYC = () => {
                   )}
                 </div>
 
+                {/* Address Proof */}
                 <div className="document-item">
-                  <label>
-                    Address Proof <span className="required">*</span>
-                  </label>
+                  <label>Address Proof <span className="required">*</span></label>
                   <div className="file-upload">
                     <input
                       type="file"
                       id="addressProof"
-                      name="addressProof"
-                      onChange={handleFileChange}
+                      onChange={(e) => handleFileChange(e, 'addressProof', 'ADDRESS_PROOF')}
                       accept=".jpg,.jpeg,.png,.pdf"
-                      required={!documents.addressProof}
                       className="file-input"
                     />
                     <label htmlFor="addressProof" className="file-label">
@@ -465,18 +453,15 @@ const KYC = () => {
                   )}
                 </div>
 
+                {/* Bank Passbook */}
                 <div className="document-item">
-                  <label>
-                    Bank Passbook/Statement <span className="required">*</span>
-                  </label>
+                  <label>Bank Passbook/Statement <span className="required">*</span></label>
                   <div className="file-upload">
                     <input
                       type="file"
                       id="bankPassbook"
-                      name="bankPassbook"
-                      onChange={handleFileChange}
+                      onChange={(e) => handleFileChange(e, 'bankPassbook', 'BANK_STATEMENT')}
                       accept=".jpg,.jpeg,.png,.pdf"
-                      required={!documents.bankPassbook}
                       className="file-input"
                     />
                     <label htmlFor="bankPassbook" className="file-label">
@@ -497,9 +482,7 @@ const KYC = () => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>
-                    Account Holder Name <span className="required">*</span>
-                  </label>
+                  <label>Account Holder Name <span className="required">*</span></label>
                   <input
                     type="text"
                     name="accountHolderName"
@@ -512,28 +495,37 @@ const KYC = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>
-                    Bank Account Number <span className="required">*</span>
-                  </label>
+                  <label>Bank Name <span className="required">*</span></label>
                   <input
                     type="text"
-                    name="bankAccount"
-                    value={kycData.bankAccount}
+                    name="bankName"
+                    value={kycData.bankName}
                     onChange={handleInputChange}
                     required
-                    placeholder="Enter bank account number"
+                    placeholder="Enter bank name"
                     className="form-input"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>
-                    IFSC Code <span className="required">*</span>
-                  </label>
+                  <label>Account Number <span className="required">*</span></label>
                   <input
                     type="text"
-                    name="ifscCode"
-                    value={kycData.ifscCode}
+                    name="accountNumber"
+                    value={kycData.accountNumber}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="Enter account number"
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>IFSC Code <span className="required">*</span></label>
+                  <input
+                    type="text"
+                    name="ifsc"
+                    value={kycData.ifsc}
                     onChange={handleInputChange}
                     required
                     placeholder="Enter IFSC code"

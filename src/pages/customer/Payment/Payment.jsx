@@ -1,7 +1,7 @@
 // pages/customer/Payment/Payment.jsx
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { bookingAPI } from '../../../services/api';
+import { bookingAPI, paymentAPI } from '../../../services/api';
 import './Payment.css';
 
 // Icon Components
